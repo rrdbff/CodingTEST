@@ -1,0 +1,113 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#define _CRT_SECURE_NO_WARNINGS
+using namespace std;
+#define X first
+#define Y second
+int N, T,gotfood;
+int sec=0;
+int K[20][20];
+int dirX[4] = { 0,-1,0,1 };
+int dirY[4] = { 1,0,-1,0 };
+struct S
+{
+	int sharksize=2;
+	int x;
+	int y;
+};
+
+bool OOB(int a, int b)
+{
+	return a < 0 or a >= N or b < 0 or b >= N;
+}
+
+S GetTheFood(S shark)
+{
+	int board[20][20];
+	for (int i = 0; i < N;i++) {
+		for (int j = 0; j < N;j++)
+		{
+			board[i][j] = K[i][j];
+		}
+	}
+	queue<pair<int, int>> Q;
+	Q.push({ shark.x,shark.y });
+	board[shark.x][shark.y] = -1;
+	while (!Q.empty())
+	{
+		pair<int, int> cur = Q.front(); Q.pop();
+		for (int dir = 0; dir < 4; dir++)
+		{
+			int nx = cur.X + dirX[dir];
+			int ny = cur.Y + dirY[dir];
+			if (OOB(nx, ny) or board[nx][ny] < 0) //outofbounce or have visited
+				continue;
+			if (board[nx][ny] == 0)
+			{
+				Q.push({ nx,ny });
+				board[nx][ny] = -1;
+			}
+			if (board[nx][ny] > shark.sharksize)
+				continue;
+			if (board[nx][ny] == shark.sharksize)
+			{
+				Q.push({ nx,ny });
+				board[nx][ny] = -1;
+			}
+			if (0 < board[nx][ny] and board[nx][ny] < shark.sharksize)
+			{
+				shark.x = nx; shark.y = ny;
+				gotfood++;
+				return shark;
+			}
+		}
+	}
+	shark.x = -9; shark.y = 9;
+	return shark;
+}
+
+
+int main()
+{
+	S shark;
+	
+	cin >> N;
+	for (int i = 0; i < N;i++) {
+		for (int j = 0; j < N;j++) {
+
+			cin >> T;
+			K[i][j] = T;
+			if (T == 9) {
+				shark.x = i;
+				shark.y = j;
+			}
+		}
+	}
+	queue<S> q;
+	q.push(shark);
+	while (!q.empty()) {
+		S temp = q.front(); q.pop();
+		shark = GetTheFood(temp);
+		if (shark.x == -9 and shark.y == -9) {
+			break;
+		}
+		else
+		{
+			if (gotfood == shark.sharksize) {
+				shark.sharksize++;
+				gotfood = 0;
+			}
+			
+			int secX = abs(shark.x - temp.x);
+			int secY = abs(shark.y - temp.y);
+			sec = secX + secY;
+			q.push(shark);
+		}
+	}
+	
+	cout << sec << "\n";
+	return 0;
+}
