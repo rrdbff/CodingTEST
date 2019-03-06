@@ -1,0 +1,128 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#define _CRT_SECURE_NO_WARNINGS
+using namespace std;
+#define X first
+#define Y second
+int N, T, gotfood;
+int totalfood = 0;
+
+int K[20][20];
+int dirX[4] = { -1,0,0,1 };
+int dirY[4] = { 0,-1,1,0 };
+struct S
+{
+	int sharksize = 2;
+	int x;
+	int y;
+	int sec = 0;
+};
+
+bool OOB(int a, int b)
+{
+	return a < 0 or a >= N or b < 0 or b >= N;
+}
+
+S GetTheFood(S shark)
+{
+	int second = 1;
+	int tt = 1;
+	int t = 4;
+	int board[20][20];
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++)
+		{
+			board[i][j] = K[i][j];
+		}
+	}
+	queue<pair<int, int>> Q;
+	Q.push({ shark.x,shark.y });
+	board[shark.x][shark.y] = -1;
+	while (!Q.empty())
+	{
+		pair<int, int> cur = Q.front(); Q.pop();
+		for (int dir = 0; dir < 4; dir++)
+		{
+			t--;
+			int nx = cur.X + dirX[dir];
+			int ny = cur.Y + dirY[dir];
+			if (OOB(nx, ny) or board[nx][ny] < 0) //outofbounce or have visited
+				continue;
+			if (board[nx][ny] == 0)
+			{
+				Q.push({ nx,ny });
+				board[nx][ny] = -1;
+			}
+			if (board[nx][ny] > shark.sharksize)
+				continue;
+			if (board[nx][ny] == shark.sharksize)
+			{
+				Q.push({ nx,ny });
+				board[nx][ny] = -1;
+			}
+			if (0 < board[nx][ny] and board[nx][ny] < shark.sharksize)
+			{
+				shark.x = nx; shark.y = ny;
+				gotfood++;
+				totalfood++;
+				shark.sec = shark.sec + second;
+				return shark;
+			}
+			
+		}
+		if (t == 0)
+		{
+			tt++;
+			t = 4*tt;
+			second++;
+		}
+
+	}
+	shark.x = -9; shark.y = -9;
+	return shark;
+}
+
+
+int main()
+{
+	S shark;
+	cin >> N;
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+
+			cin >> T;
+			K[i][j] = T;
+			if (T == 9) {
+				shark.x = i;
+				shark.y = j;
+			}
+		}
+	}
+	queue<S> q;
+	q.push(shark);
+	while (!q.empty()) {
+		S temp = q.front(); q.pop();
+		K[temp.x][temp.y] = 0;
+		shark = GetTheFood(temp);
+		if (shark.x == -9 and shark.y == -9) {
+			break;
+		}
+		else
+		{
+			K[shark.x][shark.y] = 0;
+
+			if (gotfood == shark.sharksize) {
+				shark.sharksize++;
+				gotfood = 0;
+			}
+			q.push(shark);
+		}
+	}
+	if (totalfood == 0)
+		shark.sec = 0;
+	cout << shark.sec << "\n";
+	return 0;
+}
