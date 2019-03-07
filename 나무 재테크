@@ -9,14 +9,12 @@
 #include <queue>
 using namespace std;
 
-#define R first;
-#define C second;
-int alive,dead = 11;
+int dead = 11;
 int dirr[8] = { -1,-1,-1,0,0,1,1,1 };
-int dirr[8] = { -1,0,1,-1,1,-1,0,1 };
+int dirc[8] = { -1,0,1,-1,1,-1,0,1 };
 int T, x, y, tage;
 int N,M,K;
-int seasons;
+int ntree;
 struct L
 {
 	vector<int> tree;
@@ -25,17 +23,22 @@ struct L
 
 };
 
-void spring(L** A)
+bool OOB(int a, int b)
 {
-	for (int i = 1;i < N;i++)
+	return a <= 0 or a > N or b > N or b <= 0;
+}
+
+void spring(L(*A)[12])
+{
+	for (int i = 1;i <= N;i++)
 	{
-		for (int j = 1;j < N;j++)
+		for (int j = 1;j <= N;j++)
 		{
 			if (A[i][j].tree.size() == 0)
 				continue;
 			if (A[i][j].tree.size()>1)
 				sort(A[i][j].tree.begin(), A[i][j].tree.end());
-			for (int k = 0;k < A[i][j].tree.size();k++)
+			for (int k = 0;k < (int)A[i][j].tree.size();k++)
 			{
 				int temp;
 				temp = A[i][j].energy - A[i][j].tree[k];
@@ -51,34 +54,125 @@ void spring(L** A)
 	}
 }
 
-void summer(L& A)
+void summer(L(*A)[12])
 {
-	int 
-
-}
-void autumn(L& A)
-{
-
-}
-void winter(L& A)
-{
-
-}
-int main()
-{
-	L A[11][11];
-	cin >> N >> M >> K;
-	for (int r=1;r < N;r++){
-		for (int c=1;c < N;c++) {
-			cin >> T;
-			A[r][c].refuel = T;
-
+	
+		//for (int j = 0;j <= N;j++)
+		//{
+		//	for (int k = 0; k <= N; k++)
+		//	{
+		//		cout << "(" << j << k << ")" << " ";
+		//		for (int l = 0;l < (int)A[j][k].tree.size();l++)
+		//		{
+		//			cout << A[j][k].tree[l] << " ";
+		//		}
+		//	}
+		//	cout << "\n";
+		//}
+		//cout << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\n";
+	for (int i = 1;i <= N;i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			int tsize = (int)A[i][j].tree.size();
+			for (int k = (tsize-1);k >= 0 ;k--)
+			{
+				if (A[i][j].tree[k] < 0)
+				{
+					A[i][j].energy = A[i][j].energy + ((A[i][j].tree[k] + dead) / 2);
+					A[i][j].tree.erase(A[i][j].tree.begin() + k);
+				}
+			}
 		}
 	}
-	for (int i = 1;i < M;i++) {
-			cin >> x >> y >> tage;
-			A[x][y].tree.push_back(tage);
+
+}
+void autumn(L(*A)[12])
+{
+	for (int i = 1;i <= N;i++)
+	{
+		for (int j = 1;j <= N;j++)
+		{
+			for (int k = 0;k < (int)A[i][j].tree.size();k++)
+			{
+				if ((A[i][j].tree[k] % 5) == 0)
+				{
+					for (int l = 0; l < 8;l++)
+					{
+						x = i + dirr[l];
+						y = j + dirc[l];
+						if (OOB(x, y))
+							continue;
+						else
+							A[x][y].tree.push_back(1);
+					}
+				}
+			}
+		}
+	}
+}
+void winter(L (*A)[12])
+{
+	for (int i = 1;i <= N;i++)
+	{
+		for (int j = 1;j <= N;j++)
+		{
+			A[i][j].energy += A[i][j].refuel;
+		}
+	}
+}
+
+int main()
+{
+	L A[12][12];
+	cin >> N >> M >> K;
+	for (int r = 1;r <= N;r++) {
+		for (int c = 1;c <= N;c++) {
+			cin >> T;
+			A[r][c].refuel = T;
+		}
+	}
+	for (int i = 0;i < M;i++) {
+		cin >> x >> y >> tage;
+		A[x][y].tree.push_back(tage);
 	}
 
+	for (int i = 0;i < K;i++)
+	{
+		spring(A);
+		summer(A);
+		autumn(A);
+		winter(A);
 
+		//for (int j = 0;j <= N;j++)
+		//{
+		//	for (int k = 0; k <= N; k++)
+		//	{
+		//		cout << "(" << j << k << ")" << " ";
+		//		for (int l = 0;l < (int)A[j][k].tree.size();l++)
+		//		{
+		//			cout << A[j][k].tree[l] << " ";
+		//		}
+		//	}
+		//	cout << "\n";
+		//}
+		//cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+		//for (int j = 0;j <= N;j++)
+		//{
+		//	for (int k = 0; k <= N; k++)
+		//	{
+		//		cout << A[j][k].energy << " ";
+		//	}
+		//	cout << "\n";
+		//}
+		//cout << "========================================================\n";
+	}
+	for (int i = 0;i <= N;i++){
+		for (int j = 0;j <= N;j++)
+		{
+			ntree += A[i][j].tree.size();
+		}
+	}
+	cout << ntree << "\n";
+	return 0;
 }
