@@ -1,44 +1,42 @@
 // Baekjoon.cpp: 콘솔 응용 프로그램의 진입점을 정의합니다.
 //
 
-
-#include "stdafx.h"
+//#include "pch.h"
 #include <iostream>
 #include <algorithm>
 #include <vector>
 #include <queue>
 using namespace std;
 
-int dead = 11;
+int dead = 99999999;
 int dirr[8] = { -1,-1,-1,0,0,1,1,1 };
 int dirc[8] = { -1,0,1,-1,1,-1,0,1 };
 int T, x, y, tage;
-int N,M,K;
+int N, M, K;
 int ntree;
-struct L
+struct L						//구조체 Land (tree =나무의 나이, energy= 땅의 현재 양분, refuel = 겨울에 충전되는 양분)
 {
 	vector<int> tree;
-	int energy =5;
+	int energy = 5;
 	int refuel;
-
 };
 
 bool OOB(int a, int b)
 {
-	return a <= 0 or a > N or b > N or b <= 0;
+	return a <= 0 || a > N or b > N or b <= 0;
 }
 
-void spring(L(*A)[12])
+void spring(L(*A)[12])     // 봄 : 
 {
-	for (int i = 1;i <= N;i++)
+	for (int i = 1; i <= N; i++)
 	{
-		for (int j = 1;j <= N;j++)
+		for (int j = 1; j <= N; j++)
 		{
 			if (A[i][j].tree.size() == 0)
 				continue;
-			if (A[i][j].tree.size()>1)
+			if (A[i][j].tree.size() > 1)
 				sort(A[i][j].tree.begin(), A[i][j].tree.end());
-			for (int k = 0;k < (int)A[i][j].tree.size();k++)
+			for (int k = 0; k < (int)A[i][j].tree.size(); k++)
 			{
 				int temp;
 				temp = A[i][j].energy - A[i][j].tree[k];
@@ -56,31 +54,31 @@ void spring(L(*A)[12])
 
 void summer(L(*A)[12])
 {
-	
-		//for (int j = 0;j <= N;j++)
-		//{
-		//	for (int k = 0; k <= N; k++)
-		//	{
-		//		cout << "(" << j << k << ")" << " ";
-		//		for (int l = 0;l < (int)A[j][k].tree.size();l++)
-		//		{
-		//			cout << A[j][k].tree[l] << " ";
-		//		}
-		//	}
-		//	cout << "\n";
-		//}
-		//cout << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\n";
-	for (int i = 1;i <= N;i++)
+
+	//for (int j = 0;j <= N;j++)
+	//{
+	//	for (int k = 0; k <= N; k++)
+	//	{
+	//		cout << "(" << j << k << ")" << " ";
+	//		for (int l = 0;l < (int)A[j][k].tree.size();l++)
+	//		{
+	//			cout << A[j][k].tree[l] << " ";
+	//		}
+	//	}
+	//	cout << "\n";
+	//}
+	//cout << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\n";
+	for (int i = 1; i <= N; i++)
 	{
 		for (int j = 1; j <= N; j++)
 		{
-			int tsize = (int)A[i][j].tree.size();
-			for (int k = (tsize-1);k >= 0 ;k--)
+			int tsize = (int)A[i][j].tree.size();									//erase를 사용하면 .size()가 줄어들어서
+			for (int k = (tsize - 1); k >= 0; k--)										//뒤에서부터 지움. WHY? 그래야 80번줄에서 에러가 안남
 			{
 				if (A[i][j].tree[k] < 0)
 				{
-					A[i][j].energy = A[i][j].energy + ((A[i][j].tree[k] + dead) / 2);
-					A[i][j].tree.erase(A[i][j].tree.begin() + k);
+					A[i][j].energy = A[i][j].energy + ((A[i][j].tree[k] + dead) / 2);	//죽은 애들을 양분화 시킴
+					A[i][j].tree.erase(A[i][j].tree.begin() + k);						//죽은애들 지워주기
 				}
 			}
 		}
@@ -89,15 +87,15 @@ void summer(L(*A)[12])
 }
 void autumn(L(*A)[12])
 {
-	for (int i = 1;i <= N;i++)
+	for (int i = 1; i <= N; i++)
 	{
-		for (int j = 1;j <= N;j++)
+		for (int j = 1; j <= N; j++)
 		{
-			for (int k = 0;k < (int)A[i][j].tree.size();k++)
+			for (int k = 0; k < (int)A[i][j].tree.size(); k++)
 			{
 				if ((A[i][j].tree[k] % 5) == 0)
 				{
-					for (int l = 0; l < 8;l++)
+					for (int l = 0; l < 8; l++)
 					{
 						x = i + dirr[l];
 						y = j + dirc[l];
@@ -111,11 +109,11 @@ void autumn(L(*A)[12])
 		}
 	}
 }
-void winter(L (*A)[12])
+void winter(L(*A)[12])
 {
-	for (int i = 1;i <= N;i++)
+	for (int i = 1; i <= N; i++)
 	{
-		for (int j = 1;j <= N;j++)
+		for (int j = 1; j <= N; j++)
 		{
 			A[i][j].energy += A[i][j].refuel;
 		}
@@ -124,20 +122,20 @@ void winter(L (*A)[12])
 
 int main()
 {
-	L A[12][12];
+	L A[12][12];						//땅의 크기 12로 넉넉하게 설정
 	cin >> N >> M >> K;
-	for (int r = 1;r <= N;r++) {
-		for (int c = 1;c <= N;c++) {
+	for (int r = 1; r <= N; r++) {
+		for (int c = 1; c <= N; c++) {
 			cin >> T;
 			A[r][c].refuel = T;
 		}
 	}
-	for (int i = 0;i < M;i++) {
+	for (int i = 0; i < M; i++) {
 		cin >> x >> y >> tage;
-		A[x][y].tree.push_back(tage);
+		A[y][x].tree.push_back(tage);
 	}
 
-	for (int i = 0;i < K;i++)
+	for (int i = 0; i < K; i++)				// K년동안 돌림
 	{
 		spring(A);
 		summer(A);
@@ -167,10 +165,10 @@ int main()
 		//}
 		//cout << "========================================================\n";
 	}
-	for (int i = 0;i <= N;i++){
-		for (int j = 0;j <= N;j++)
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= N; j++)
 		{
-			ntree += A[i][j].tree.size();
+			ntree += A[i][j].tree.size();			//맵전체를 돌며 나무의 갯수를 셈.
 		}
 	}
 	cout << ntree << "\n";
