@@ -1,4 +1,4 @@
-#include <stdio.h>
+
 #include <algorithm>
 #include <queue>
 #include <iostream>
@@ -9,34 +9,47 @@ struct Station {
 	vector<int> con;
 	int a;
 };
-Station S[10000000];
+Station S[1000000];
 int q,w;
 bool visit[1000000];
 int d[1000000];
 int u[1000000];
 int bestnum;
 int bestden;
-int bestcalc;
-void BFS() {
+double bestcalc;
+
+void ﻿abbreviate(int numerator, int denominator) {
+	int min = denominator;
+	for (int i = min; i > 1; i--) {
+		// 이중조건문, 둘다 만족시 나누기 수행
+		(numerator%i == 0) ? (denominator%i) ? numerator /= i, denominator /= i : 0 : 0;
+	}
+	cout << numerator << "/" << denominator << "\n";
+}
+
+void BFS(int start)
+{
 	fill(visit, visit + N, false);
-	fill(d, d + N, 1);
+	fill(d,d+N,1);
 	queue<int> q;
-	q.push(0);
-	visit[0] = true;
-	while (!q.empty)
+	q.push(start);
+	visit[start] = true;
+
+	u[start] = S[start].a;
+	d[start] = 1;
+	while (!q.empty())
 	{
 		int temp = q.front();
 		q.pop();
-		bestnum = S[temp].a;
-		bestden = 1;
-		bestcalc = bestnum / bestden;
-		u[temp] = S[temp].a;
-		d[temp] = 1;
-		for (int i = 0;i < S[temp].con.size();i++)
+
+		if (S[temp].con.size() == 0)
+			continue;
+		for (int i = 0;i < (int)S[temp].con.size();i++)
 		{
 			if (visit[S[temp].con[i]] == false)
 			{
 				visit[S[temp].con[i]] = true;
+				q.push(S[temp].con[i]);
 			}
 			else
 				continue;
@@ -52,24 +65,36 @@ void BFS() {
 				bestden = d[connect];
 				bestcalc = calc;
 			}
+			
 		}
 	}
 }
 int main()
 {
-	cin >> T >> N;
-	for (int i = 1;i < N;i++)
-	{
-		cin >> q >> w;
-		S[q].con.push_back(w);
-		S[w].con.push_back(q);
+	cin >> T;
+	for (int k = 0;k < T;k++) {
+		cin >> N;
+		for (int i = 1;i < N;i++)
+		{
+			cin >> q >> w;
+			S[q-1].con.push_back(w-1);
+			S[w-1].con.push_back(q-1);
+		}
+		for (int i = 0;i < N;i++)
+		{
+			cin >> q;
+			S[i].a = q;
+		}
+		bestnum = S[0].a;
+		bestden = 1;
+		bestcalc = bestnum / bestden;
+		for (int i = 0;i < N;i++)
+		{
+			BFS(i);
+		}
+		cout << "#" << k + 1 << " ";
+		﻿abbreviate(bestnum, bestden);
 	}
-	for (int i = 0;i < N;i++)
-	{
-		cin >> q;
-		S[i].a = q;
-	}
-
 	return 0;
 
 }
